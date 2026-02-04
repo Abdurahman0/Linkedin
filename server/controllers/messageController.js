@@ -34,7 +34,7 @@ export const sseController = (req, res) => {
 export const sendMessage = async (req, res) => {
 	try {
 		const { userId } = req.auth()
-		const { to_user_id, text } = req.body()
+		const { to_user_id, text } = req.body
 		const image = req.file
 
 		let media_url = ''
