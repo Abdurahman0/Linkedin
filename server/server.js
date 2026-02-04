@@ -23,7 +23,7 @@ app.get('/', (req, res) => res.send('Server is running'))
 app.use('/api/user', userRouter)
 app.use('/api/post', postRouter)
 app.use('/api/story', storyRouter)
-app.use('/api/message', messageRouter)
+app.use('/api/messages', messageRouter)
 
 const PORT = process.env.PORT || 4000
 
