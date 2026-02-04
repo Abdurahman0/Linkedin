@@ -1,24 +1,47 @@
-import { useState } from 'react'
-import { dummyConnectionsData } from '../assets/assets'
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import UserCard from '../components/UserCard'
 import Loading from '../components/Loading'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
+import { useAuth } from '@clerk/clerk-react'
+import { useDispatch } from 'react-redux'
+import { fetchUser } from '../features/user/userSlice'
 
 const Discover = () => {
+	const dispatch = useDispatch()
 	const [input, setInput] = useState('')
-	const [users, setUsers] = useState(dummyConnectionsData)
+	const [users, setUsers] = useState()
 	const [loading, setLoading] = useState(false)
+	const { getToken } = useAuth()
 
 	const handleSearch = async e => {
 		if (e.key === 'Enter') {
-			setUsers([])
-			setLoading(true)
-			setTimeout(() => {
-				setUsers(dummyConnectionsData)
+			try {
+				setUsers([])
+				setLoading(true)
+				const { data } = await api.post(
+					'/api/user/discover',
+					{ input },
+					{
+						headers: { Authorization: `Bearer ${await getToken()}` },
+					},
+				)
+
+				data.success ? setUsers(data.users) : toast.error(data.message)
 				setLoading(false)
-			}, 1000)
+				setInput('')
+			} catch (error) {
+				toast.error(error.message)
+			}
+			setLoading(false)
 		}
 	}
+
+	useEffect(() => {
+		getToken().then(token => dispatch(fetchUser(token)))
+	}, [])
 
 	return (
 		<div className='min-h-screen bg-linear-to-r from-slate-50 to-white'>
@@ -51,7 +74,7 @@ const Discover = () => {
 				</div>
 
 				<div className='flex flex-wrap gap-6'>
-					{users.map(user => (
+					{users?.map(user => (
 						<UserCard key={user._id} user={user} />
 					))}
 				</div>
